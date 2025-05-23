@@ -1,12 +1,10 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs "NodeJS"
-    }
-
     environment {
-        SONAR_TOKEN = credentials('SONAR_TOKEN') // ID of your SonarCloud token in Jenkins
+        SONAR_TOKEN = credentials('SONAR_TOKEN')
+        NODE_HOME = tool name: 'NodeJS', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
+        PATH = "${NODE_HOME}/bin:${env.PATH}"
     }
 
     stages {
@@ -18,13 +16,13 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh 'npm test || exit 0' // Continue pipeline even if tests fail
+                sh 'npm test || exit 0'
             }
         }
 
         stage('NPM Audit (Security Scan)') {
             steps {
-                sh 'npm audit || exit 0' // Continue pipeline even if audit reports issues
+                sh 'npm audit || exit 0'
             }
         }
 
@@ -50,5 +48,4 @@ pipeline {
     }
 }
 
-   
-                   
+     
