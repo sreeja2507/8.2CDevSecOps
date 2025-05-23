@@ -1,15 +1,23 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs 'NodeJS' // This must match the name configured under Manage Jenkins > Global Tool Configuration
-    }
-
     environment {
-        SONAR_SCANNER_HOME = 'sonar-scanner-4.8.0.2856-windows' // or path where your scanner is extracted
+        SONAR_SCANNER_HOME = 'C:\\Users\\HP\\Downloads\\sonar-scanner-cli-7.1.0.4889-windows-x64'
     }
 
     stages {
+        stage('Checkout SCM') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Tool Install') {
+            tools {
+                nodejs 'NodeJS'
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
                 bat 'npm install'
@@ -32,7 +40,7 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
                     bat '''
-                        ${SONAR_SCANNER_HOME}\\bin\\sonar-scanner.bat ^
+                        "%SONAR_SCANNER_HOME%\\bin\\sonar-scanner.bat" ^
                         -D"sonar.projectKey=sreeja2507_8.2CDevSecOps" ^
                         -D"sonar.organization=sreeja2507" ^
                         -D"sonar.sources=." ^
@@ -51,6 +59,7 @@ pipeline {
     }
 }
 
+           
                  
 
        
