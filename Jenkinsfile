@@ -1,15 +1,19 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs 'NodeJS'
-    }
-
     environment {
-        SONAR_SCANNER_HOME = 'C:\\Users\\HP\\Downloads\\sonar-scanner-cli-7.1.0.4889-windows-x64'
+        NODEJS_HOME = "${tool 'NodeJS'}"
+        PATH = "${env.NODEJS_HOME}/bin:${env.PATH}"
     }
 
     stages {
+        stage('Tool Install') {
+            steps {
+                echo 'Installing NodeJS...'
+                tool name: 'NodeJS', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
+            }
+        }
+
         stage('Checkout SCM') {
             steps {
                 checkout scm
@@ -35,36 +39,30 @@ pipeline {
         }
 
         stage('SonarCloud Analysis') {
-    steps {
-        withEnv(["PATH+SONAR=${tool 'SonarScanner'}\\bin"]) {
-            withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
-                bat '''
-                    sonar-scanner ^
-                    -D"sonar.projectKey=sreeja2507_8.2CDevSecOps" ^
-                    -D"sonar.organization=sreeja2507" ^
-                    -D"sonar.sources=." ^
-                    -D"sonar.host.url=https://sonarcloud.io" ^
-                    -D"sonar.login=%SONAR_TOKEN%"
-                '''
+            steps {
+                withEnv(["PATH+SONAR=${tool 'SonarScanner'}\\bin"]) {
+                    withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
+                        bat '''
+                            sonar-scanner ^
+                            -D"sonar.projectKey=sreeja2507_8.2CDevSecOps" ^
+                            -D"sonar.organization=sreeja2507" ^
+                            -D"sonar.sources=." ^
+                            -D"sonar.host.url=https://sonarcloud.io" ^
+                            -D"sonar.login=%SONAR_TOKEN%"
+                        '''
+                    }
+                }
             }
         }
     }
-}
 
     post {
         always {
-            echo "Pipeline completed. Sonar token was loaded: ${env.SONAR_TOKEN != null ? 'Yes' : 'No'}"
+            echo 'Pipeline completed.'
         }
     }
 }
-       
-      
-      
 
-           
-                 
-
-       
       
        
      
