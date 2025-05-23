@@ -42,7 +42,18 @@ pipeline {
                         -D"sonar.projectKey=sreeja2507_8.2CDevSecOps" ^
                         -D"sonar.organization=sreeja2507" ^
                         -D"sonar.sources
+                        '''
+                    }
+            }
+        }
+    }
 
+    post {
+        always {
+            echo "Pipeline completed. Sonar token was loaded: ${env.SONAR_TOKEN != null ? 'Yes' : 'No'}"
+        }
+    }
+}
        
       
       
