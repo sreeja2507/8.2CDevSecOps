@@ -2,43 +2,43 @@ pipeline {
     agent any
 
     tools {
-        nodejs "NodeJS" // Ensure NodeJS is installed in Jenkins (Manage Jenkins > Global Tool Configuration)
+        nodejs "NodeJS"
     }
 
     environment {
-        SONAR_TOKEN = credentials('SONAR_TOKEN') // Replace with your credential ID
+        SONAR_TOKEN = credentials('SONAR_TOKEN') // ID of your SonarCloud token in Jenkins
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                git url: 'https://github.com/sreeja2507/8.2CDevSecOps.git', branch: 'main'
-            }
-        }
-
         stage('Install Dependencies') {
             steps {
-                bat 'npm install'
+                sh 'npm install'
             }
         }
 
         stage('Run Tests') {
             steps {
-                bat 'npm test || exit /b 0' // Avoid fail if snyk test is not yet set up
+                sh 'npm test || exit 0' // Continue pipeline even if tests fail
+            }
+        }
+
+        stage('NPM Audit (Security Scan)') {
+            steps {
+                sh 'npm audit || exit 0' // Continue pipeline even if audit reports issues
             }
         }
 
         stage('SonarCloud Analysis') {
             steps {
-                bat '''
-                    curl -o sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-windows.zip
-                    powershell -Command "Expand-Archive sonar-scanner.zip -DestinationPath . -Force"
-                    sonar-scanner-4.8.0.2856-windows\\bin\\sonar-scanner.bat ^
-                    -D"sonar.projectKey=sreeja2507_8.2CDevSecOps" ^
-                    -D"sonar.organization=sreeja2507" ^
-                    -D"sonar.host.url=https://sonarcloud.io" ^
-                    -D"sonar.login=%SONAR_TOKEN%"
-                '''
+                withSonarQubeEnv('SonarCloud') {
+                    sh '''
+                        npx sonar-scanner \
+                          -Dsonar.projectKey=sreeja2507_8.2CDevSecOps \
+                          -Dsonar.organization=sreeja2507 \
+                          -Dsonar.host.url=https://sonarcloud.io \
+                          -Dsonar.login=$SONAR_TOKEN
+                    '''
+                }
             }
         }
     }
@@ -50,3 +50,5 @@ pipeline {
     }
 }
 
+   
+                   
