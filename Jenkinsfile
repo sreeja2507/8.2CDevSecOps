@@ -36,19 +36,20 @@ pipeline {
 
         stage('SonarCloud Analysis') {
     steps {
-        withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
-            bat """
-            \"C:\\\\Users\\\\HP\\\\Downloads\\\\sonar-scanner-cli-7.1.0.4889-windows-x64\\\\bin\\\\sonar-scanner.bat\" ^
-            -D\"sonar.projectKey=sreeja2507_8.2CDevSecOps\" ^
-            -D\"sonar.organization=sreeja2507\" ^
-            -D\"sonar.sources=.\" ^
-            -D\"sonar.host.url=https://sonarcloud.io\" ^
-            -D\"sonar.login=%SONAR_TOKEN%\"
-            """
+        withEnv(["PATH+SONAR=${tool 'SonarScanner'}\\bin"]) {
+            withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
+                bat '''
+                    sonar-scanner ^
+                    -D"sonar.projectKey=sreeja2507_8.2CDevSecOps" ^
+                    -D"sonar.organization=sreeja2507" ^
+                    -D"sonar.sources=." ^
+                    -D"sonar.host.url=https://sonarcloud.io" ^
+                    -D"sonar.login=%SONAR_TOKEN%"
+                '''
+            }
         }
     }
 }
-    }
 
     post {
         always {
