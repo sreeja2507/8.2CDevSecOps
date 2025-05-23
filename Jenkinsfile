@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'NodeJS'
+    }
+
     environment {
         SONAR_SCANNER_HOME = 'C:\\Users\\HP\\Downloads\\sonar-scanner-cli-7.1.0.4889-windows-x64'
     }
@@ -9,12 +13,6 @@ pipeline {
         stage('Checkout SCM') {
             steps {
                 checkout scm
-            }
-        }
-
-        stage('Tool Install') {
-            tools {
-                nodejs 'NodeJS'
             }
         }
 
@@ -43,21 +41,11 @@ pipeline {
                         "%SONAR_SCANNER_HOME%\\bin\\sonar-scanner.bat" ^
                         -D"sonar.projectKey=sreeja2507_8.2CDevSecOps" ^
                         -D"sonar.organization=sreeja2507" ^
-                        -D"sonar.sources=." ^
-                        -D"sonar.host.url=https://sonarcloud.io" ^
-                        -D"sonar.login=%SONAR_TOKEN%"
-                    '''
-                }
-            }
-        }
-    }
+                        -D"sonar.sources
 
-    post {
-        always {
-            echo "Pipeline completed. Sonar token was loaded: ${env.SONAR_TOKEN != null ? 'Yes' : 'No'}"
-        }
-    }
-}
+       
+      
+      
 
            
                  
