@@ -1,40 +1,43 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'NodeJS' // This must match the name configured under Manage Jenkins > Global Tool Configuration
+    }
+
     environment {
-        SONAR_TOKEN = credentials('SONAR_TOKEN')
-        NODE_HOME = tool name: 'NodeJS', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
-        PATH = "${NODE_HOME}/bin:${env.PATH}"
+        SONAR_SCANNER_HOME = 'sonar-scanner-4.8.0.2856-windows' // or path where your scanner is extracted
     }
 
     stages {
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                bat 'npm install'
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'npm test || exit 0'
+                bat 'npm test || exit /b 0'
             }
         }
 
-        stage('NPM Audit (Security Scan)') {
+        stage('Security Scan - npm audit') {
             steps {
-                sh 'npm audit || exit 0'
+                bat 'npm audit || exit /b 0'
             }
         }
 
         stage('SonarCloud Analysis') {
             steps {
-                withSonarQubeEnv('SonarCloud') {
-                    sh '''
-                        npx sonar-scanner \
-                          -Dsonar.projectKey=sreeja2507_8.2CDevSecOps \
-                          -Dsonar.organization=sreeja2507 \
-                          -Dsonar.host.url=https://sonarcloud.io \
-                          -Dsonar.login=$SONAR_TOKEN
+                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                    bat '''
+                        ${SONAR_SCANNER_HOME}\\bin\\sonar-scanner.bat ^
+                        -D"sonar.projectKey=sreeja2507_8.2CDevSecOps" ^
+                        -D"sonar.organization=sreeja2507" ^
+                        -D"sonar.sources=." ^
+                        -D"sonar.host.url=https://sonarcloud.io" ^
+                        -D"sonar.login=%SONAR_TOKEN%"
                     '''
                 }
             }
@@ -48,5 +51,8 @@ pipeline {
     }
 }
 
+
+       
+      
        
      
